@@ -3,6 +3,7 @@ import openscience
 
 
 class Extractor:
+    # setup variables and login to loris instance.
     def __init__(self):
         print 'Extractor: init started.'
         # loris "username & password" required.
@@ -13,14 +14,27 @@ class Extractor:
         )
         # online status (successful login or not) of loris.
         self.status = self.loris.login()
+        # candidates from loris instance.
+        self.candidates = []
+        # instruments from loris instance.
+        self.instruments = []
         print 'Extractor: init finished.'
 
+    # retrieve latest data.
     def refresh(self):
         print '~~~~~~~~~~~~~~~~~~~~~~~~~~'
         # loris login was successful.
         if self.status:
-            print 'Extractor is online.'
-            candidates = self.loris.candidates()
-            print candidates
+            # fetch latest candidates, return success or error.
+            self.status = self.loris.fetch_candidates()
+            if self.status:
+                print 'Extractor: success fetching candidates.'
+                self.loris.fetch_instruments()
+            else:
+                print 'Extractor: error fetching candidates.'
         else:
-            print 'Extractor is offline.'
+            print 'Extractor: loris instance is offline.'
+
+    # process data.
+    def process(self):
+        print '~~~~~~~~~~~~~~~~~~~~~~~~~~'

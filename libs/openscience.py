@@ -1,8 +1,11 @@
 import json
 import requests
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class Loris:
+    # setup variables.
     def __init__(self, url, username, password):
         print '- Loris: init started.'
         # Version number of API.
@@ -13,7 +16,6 @@ class Loris:
         self.api = {
             'login': '/login',
             'candidates': '/candidates/',
-            'candidate_instruments': '/candidates/$CandID/$VisitLabel/instruments'
         }
         # Username and Password for login.
         self.username = username
@@ -22,8 +24,11 @@ class Loris:
         self.token = ''
         # Error message details.
         self.error = ''
+        # candidates data
+        self.candidates = []
         print '- Loris: init finished.'
 
+    # login session for loris instance.
     def login(self):
         print '- Loris: login fired!'
         # login parameters for post.
@@ -56,8 +61,9 @@ class Loris:
             print '- Loris: login finished and success.'
             return True
 
-    def candidates(self):
-        print '- Loris: candidates fired!'
+    # fetch all candidates from loris instance.
+    def fetch_candidates(self):
+        print '- Loris: fetch_candidates fired!'
         candidates_response = json.loads(requests.get(
             url=self.url + self.api['candidates'],
             verify=False,
@@ -66,6 +72,75 @@ class Loris:
             }
         ).content.decode('ascii'))
         if 'Candidates' in candidates_response:
-            return candidates_response['Candidates']
+            self.candidates = candidates_response['Candidates']
+            return True
         else:
+            self.candidates = []
+            return False
+
+    # requires cand_id: CandID
+    # return candidate from loris instance.
+    def get_candidate(self, cand_id):
+        print '- Loris: get_candidate from CandID: ' + cand_id
+        candidate = json.loads(requests.get(
+            url=self.url + self.api['candidates'] + cand_id,
+            verify=False,
+            headers={
+                'Authorization': 'Bearer %s' % self.token
+            }
+        ).content.decode('ascii'))
+        return candidate
+
+    # return all instruments from candidates
+    # (array of dict: containing CandID) supplied.
+    def fetch_instruments(self):
+        print '- Loris: fetch_instruments fired!'
+        if self.candidates:
+            for index, candidate in enumerate(self.candidates):
+                if candidate['CandID']:
+                    # get candidate object containing the visit_labels (array).
+                    self.candidates[index] = self.get_candidate(candidate['CandID'])
+                    for visit_label in (self.candidates[index])['Visits']:
+                        print visit_label
+                        # get instruments for visit_label.
+                        instruments_in_candidate = json.loads(requests.get(
+                            url=self.url + self.api['candidates']
+                                         + candidate['CandID']
+                                         + '/'
+                                         + visit_label
+                                         + '/instruments',
+                            verify=False,
+                            headers={
+                                'Authorization': 'Bearer %s' % self.token
+                            }
+                        ).content.decode('ascii'))
+                        # fetch instrument data from instruments (array).
+                        if not instruments_in_candidate.get('error') \
+                                and instruments_in_candidate['Instruments']:
+                            # per instrument in instruments (array).
+                            for instrument in instruments_in_candidate['Instruments']:
+                                # get instrument data received here.
+                                instrument_data = json.loads(requests.get(
+                                    url=self.url + self.api['candidates']
+                                                 + candidate['CandID']
+                                                 + '/'
+                                                 + visit_label
+                                                 + '/instruments/' + instrument,
+                                    verify=False,
+                                    headers={
+                                        'Authorization': 'Bearer %s' % self.token
+                                    }
+                                ).content.decode('ascii'))
+                                print instrument_data
+            print '- Loris: fetch_instruments complete.'
+            return self.candidates
+        else:
+            print 'Extractor: candidates empty.'
             return []
+
+    def get_instrument(self, cand_id, visit_label):
+        print '- Loris: instrument fired!'
+        if cand_id and visit_label:
+            instrument = json.loads(requests.get(
+                url=self.url + self.api['candidates'] + cand_id + '/' + visit_label + '/instruments'
+            ))

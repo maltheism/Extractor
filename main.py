@@ -9,3 +9,5 @@ extractor = plugin.Extractor()
 # refresh latest data for extractor.
 extractor.refresh()
 
+# process extractor data.
+extractor.process()
