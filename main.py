@@ -7,7 +7,7 @@ config.Settings.debugger()
 extractor = plugin.Extractor()
 
 # refresh latest data for extractor.
-extractor.refresh()
+#extractor.refresh()
 
 # process extractor data.
 extractor.process()

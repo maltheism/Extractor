@@ -1,3 +1,4 @@
+import git
 import config
 import openscience
 
@@ -38,3 +39,7 @@ class Extractor:
     # process data.
     def process(self):
         print '~~~~~~~~~~~~~~~~~~~~~~~~~~'
+        annex = git.Annex()
+        annex.ls()
+
+
