@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from libs import config, plugin
 
 # disables print depending on settings.

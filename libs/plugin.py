@@ -40,6 +40,5 @@ class Extractor:
     def process(self):
         print '~~~~~~~~~~~~~~~~~~~~~~~~~~'
         annex = git.Annex()
-        annex.ls()
-
-
+        annex.refresh()
+        #annex.ls()
