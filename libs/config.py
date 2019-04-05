@@ -7,11 +7,11 @@ class Settings:
         pass
 
     # url of loris instance.
-    url = 'https://phantom-dev.loris.ca'
+    url = 'https://awickenheiser-dev.loris.ca'
     # username for loris.
-    username = 'intralizee'
+    username = 'admin'
     # password for loris.
-    password = 'LkvuvVxoqBZzNkocAVbHMKDqA3Wx*WjKi'
+    password = 'a1123581321'
     # enable debug mode.
     debug = True
 
