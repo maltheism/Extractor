@@ -85,31 +85,36 @@ class Loris:
             # Remove what we don't need
             for item_in_collection in collection:
                 for item in self.candidates:
-                    if 'CandID' in item and item_in_collection['Candidate'] is item['CandID']:
-                        candidate_data = self.get_candidate(item['CandID'])
+                    print '[0] Step Begin'
+                    if 'CandID' in item:
+                        print 'CHECK HERE:'
+                        print item['CandID']
+                        if 'CandID' in item and len(item['CandID']) > 6:
+                            candidate_data = self.get_candidate(item['CandID'])
+                            print '[1] CHECK HERE'
+                            print candidate_data
+                            for visit_label in candidate_data['Visits']:
+                                print 'CHECK!!!!!'
+                                # gets data of each visit in candidate from api
+                                visit_in_candidate = json.loads(requests.get(
+                                    url=self.url + self.api['candidates']
+                                                 + item['CandID']
+                                                 + '/'
+                                                 + visit_label,
+                                    verify=False,
+                                    headers={
+                                        'Authorization': 'Bearer %s' % self.token
+                                    }
+                                ).content.decode('ascii'))
+                                self.file.save_to_file(
+                                    'visit_' + item['CandID'] + '_' + visit_label + '.json',
+                                    json.dumps(visit_in_candidate)
+                                )
 
-                        for visit_label in candidate_data['Visits']:
-                            # gets data of each visit in candidate from api
-                            visit_in_candidate = json.loads(requests.get(
-                                url=self.url + self.api['candidates']
-                                             + item['CandID']
-                                             + '/'
-                                             + visit_label,
-                                verify=False,
-                                headers={
-                                    'Authorization': 'Bearer %s' % self.token
-                                }
-                            ).content.decode('ascii'))
-
-                        arr.append({
-                            item
-                        })
-            self.candidates = arr
-
-            # self.file.save_to_file(
-            #     'Candidate_Data_CandID_' + candidate['CandID'],
-            #     candidate
-            # )
+            self.file.save_to_file(
+                'Candidate_Data.json',
+                json.dumps(candidates_response)
+            )
 
             return True
         else:

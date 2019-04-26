@@ -7,11 +7,11 @@ class Settings:
         pass
 
     # url of loris instance.
-    url = 'https://awickenheiser-dev.loris.ca'
+    url = 'https://preventad-open-dev.loris.ca'
     # username for loris.
-    username = 'admin'
+    username = 'dave'
     # password for loris.
-    password = 'a1123581321'
+    password = 'mnwi!k2)'
     # enable debug mode.
     debug = True
 
