@@ -2,6 +2,7 @@ import json
 import utils
 import requests
 import urllib3
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
@@ -67,7 +68,7 @@ class Loris:
             return True
 
     # fetch all candidates from loris instance.
-    def fetch_candidates(self):
+    def fetch_candidates(self, collection):
         print '- Loris: fetch_candidates fired!'
         candidates_response = json.loads(requests.get(
             url=self.url + self.api['candidates'],
@@ -78,6 +79,38 @@ class Loris:
         ).content.decode('ascii'))
         if 'Candidates' in candidates_response:
             self.candidates = candidates_response['Candidates']
+
+            # (NEW) this array is what we care about
+            arr = []
+            # Remove what we don't need
+            for item_in_collection in collection:
+                for item in self.candidates:
+                    if 'CandID' in item and item_in_collection['Candidate'] is item['CandID']:
+                        candidate_data = self.get_candidate(item['CandID'])
+
+                        for visit_label in candidate_data['Visits']:
+                            # gets data of each visit in candidate from api
+                            visit_in_candidate = json.loads(requests.get(
+                                url=self.url + self.api['candidates']
+                                             + item['CandID']
+                                             + '/'
+                                             + visit_label,
+                                verify=False,
+                                headers={
+                                    'Authorization': 'Bearer %s' % self.token
+                                }
+                            ).content.decode('ascii'))
+
+                        arr.append({
+                            item
+                        })
+            self.candidates = arr
+
+            # self.file.save_to_file(
+            #     'Candidate_Data_CandID_' + candidate['CandID'],
+            #     candidate
+            # )
+
             return True
         else:
             self.candidates = []
@@ -106,10 +139,10 @@ class Loris:
                     # get instruments for Candidate and Visit.
                     instruments_in_candidate = json.loads(requests.get(
                         url=self.url + self.api['candidates']
-                                     + item['Candidate']
-                                     + '/'
-                                     + item['Visit']
-                                     + '/instruments',
+                            + item['Candidate']
+                            + '/'
+                            + item['Visit']
+                            + '/instruments',
                         verify=False,
                         headers={
                             'Authorization': 'Bearer %s' % self.token
@@ -124,10 +157,10 @@ class Loris:
                             # get instrument data received here.
                             instrument_data = json.loads(requests.get(
                                 url=self.url + self.api['candidates']
-                                             + item['Candidate']
-                                             + '/'
-                                             + item['Visit']
-                                             + '/instruments/' + instrument,
+                                    + item['Candidate']
+                                    + '/'
+                                    + item['Visit']
+                                    + '/instruments/' + instrument,
                                 verify=False,
                                 headers={
                                     'Authorization': 'Bearer %s' % self.token
@@ -155,7 +188,7 @@ class Loris:
                                         + '/'
                                         + item['Visit']
                                         + '/instruments/' + instrument
-                                     ]
+                                    ]
                                 )
                                 print 'instrument data: '
                                 print instrument_data

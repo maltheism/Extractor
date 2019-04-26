@@ -33,6 +33,11 @@ class Extractor:
             print 'Extractor: fetching instrument data.'
             self.loris.fetch_instruments(self.annex.collection_unique)
             self.annex.update(self.loris.history_file_and_url)
+            print 'CHEKC THIS:'
+            print self.annex.collection_unique
+            print 'OMG'
+            print '(NEW) Extractor: fetching candidates data.'
+            self.loris.fetch_candidates(self.annex.collection_unique)
         else:
             print 'Extractor: loris instance is offline.'
 
